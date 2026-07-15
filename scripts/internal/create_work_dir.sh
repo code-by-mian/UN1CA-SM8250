@@ -66,6 +66,8 @@ COPY_SOURCE_FIRMWARE()
 
             ADD_TO_WORK_DIR "b0sxxx" "system_ext" "etc/build_flags.json" 0 0 644 "u:object_r:system_file:s0" || exit 1
             DELETE_FROM_WORK_DIR "system" "system/system_ext/etc/NOTICE.xml.gz"
+            DELETE_FROM_WORK_DIR "system" "system/system_ext/etc/fs_config_dirs"
+            DELETE_FROM_WORK_DIR "system" "system/system_ext/etc/fs_config_files"
 
             LOG_STEP_OUT
         fi
