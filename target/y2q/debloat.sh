@@ -17,7 +17,6 @@ PRODUCT_DEBLOAT+="
 overlay/SoftapOverlay6GHz
 overlay/SoftapOverlayDualAp
 overlay/SoftapOverlayOWE
-priv-app/Velvet
 "
 
 # mAFPC
@@ -68,14 +67,6 @@ lib64/vendor.qti.qccvndhal_aidl-V1-ndk.so
 priv-app/com.qualcomm.location
 priv-app/com.qualcomm.qti.services.systemhelper
 "
-# Spen Debloat
-SYSTEM_DEBLOAT+="
-system/priv-app/AirCommand
-system/app/AirGlance
-system/priv-app/AirReadingGlass
-system/priv-app/SmartEye
-system/app/Rampart
-" 
 
 SYSTEM_DEBLOAT+="
 system/etc/default-permissions/default-permissions-com.samsung.android.service.aircommand.xml
