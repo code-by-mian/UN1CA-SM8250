@@ -194,20 +194,43 @@ if ! $SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
         ADD_TO_WORK_DIR "b0qxxx" "system" "system/media/temperature_limit_usb.spi" 0 0 644 "u:object_r:system_file:s0"
         ADD_TO_WORK_DIR "b0qxxx" "system" "system/media/water_protection_usb.spi" 0 0 644 "u:object_r:system_file:s0"
 
-        # APPLY_PATCH "system" "system/framework/framework.jar" \
-    #     "$MODPATH/resolution/framework.jar/0001-Enable-DYN_RESOLUTION_CONTROL-and-VRR-flags.patch"
-    # if [ "$TARGET_PLATFORM_SDK_VERSION" -lt "36" ]; then
-    #     APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    #         "$MODPATH/resolution/SecSettings.apk/0002-Backport-legacy-DYN_RESOLUTION_CONTROL-code.patch"
-    # fi
+        if [ "$TARGET_PLATFORM_SDK_VERSION" -ge "36" ]; then
+            APPLY_PATCH "system" "system/framework/framework.jar" \
+                "$MODPATH/resolution/framework.jar/0001-Enable-FW_SUPPORT_MULTI_RESOLUTION.patch"
+        else
+            APPLY_PATCH "system" "system/framework/framework.jar" \
+                "$MODPATH/resolution/framework.jar/0001-Enable-FW_DYNAMIC_RESOLUTION_CONTROL.patch"
+        fi
+        APPLY_PATCH "system" "system/framework/gamemanager.jar" \
+            "$MODPATH/resolution/gamemanager.jar/0001-Enable-dynamic-resolution-control.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/resolution/SecSettings.apk/0001-Enable-dynamic-resolution-control.patch"
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali_classes2/com/android/settings/Utils\$\$ExternalSyntheticLambda2.smali" "remove"
+        EVAL "sed -i \"s/^\.implements.*/.implements Landroidx\/core\/view\/OnApplyWindowInsetsListener;/g\" \"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes2/com/android/settings/Utils\\\$\\\$ExternalSyntheticLambda3.smali\""
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali_classes2/com/android/settings/applications/manageapplications/ManageApplications\$ApplicationsAdapter\$\$ExternalSyntheticLambda3.smali" "remove"
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali_classes2/com/android/settings/applications/manageapplications/ManageApplications\$ApplicationsAdapter\$\$ExternalSyntheticLambda7.smali" "remove"
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali_classes2/com/android/settings/applications/manageapplications/ManageApplications\$ApplicationsAdapter\$\$ExternalSyntheticLambda9.smali" "remove"
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali_classes2/com/android/settings/applications/manageapplications/ManageApplications\$ApplicationsAdapter\$\$ExternalSyntheticOutline0.smali" "remove"
+        if [ "$TARGET_PLATFORM_SDK_VERSION" -lt "36" ]; then
+            APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+                "$MODPATH/resolution/SecSettings.apk/0002-Backport-legacy-DYN_RESOLUTION_CONTROL-code.patch"
+            EVAL "sed -i \"/static fields/,+3d\" \"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes4/com/samsung/android/settings/display/ScreenResolutionFragment.smali\""
+            SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+                "smali_classes4/com/samsung/android/settings/display/controller/ScreenResolutionPreferenceController\$2.smali" "remove"
+        fi
+        APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+            "$MODPATH/resolution/SystemUI.apk/0001-Enable-dynamic-resolution-control.patch"
+    fi
 else
-    SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_COMMON_CONFIG_DYN_RESOLUTION_CONTROL" --delete
-    APPLY_PATCH "system" "system/framework/framework.jar" \
-        "$MODPATH/resolution/framework.jar/0001-Disable-MULTI_RESOLUTION-flags.patch"
-    APPLY_PATCH "system" "system/framework/gamemanager.jar" \
-        "$MODPATH/resolution/gamemanager.jar/0001-Disable-MULTI_RESOLUTION_SUPPORTED.patch"
-    APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
-        "$MODPATH/resolution/SystemUI.apk/0001-Disable-multi-resolution-edge-lighting.patch"
+    if ! $TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
+        # TODO handle this condition
+        LOG_MISSING_PATCHES "SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL" "TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL"
+    fi
 fi
 
 # SEC_PRODUCT_FEATURE_COMMON_SUPPORT_EMBEDDED_SIM
