@@ -1,4 +1,4 @@
-name: Build sm8250
+name: Build UN1CA
 
 on:
   workflow_dispatch:
